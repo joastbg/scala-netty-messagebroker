@@ -1,6 +1,14 @@
 
 <html><head><title>WebSockets DEMO</title></head>
 <body>
+
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+
+<link rel="stylesheet" type="text/css" href="jquery.gritter.css" />
+<script type="text/javascript" src="jquery.gritter.js"></script>
+
+
+
 <script type="text/javascript">
   
   function init() {
@@ -18,6 +26,16 @@
     ta.scrollTop = ta.scrollHeight;
   }
 
+  function popup(text) {
+    $.gritter.add({
+      title: text,
+      text: "Hello again",
+      image: 'http://icons.iconarchive.com/icons/aha-soft/large-time/32/Alarm-clock-icon.png',
+      sticky: false,
+      time: ''
+    });
+  }
+
   function connect(topic) {
     var socket;
     if (window.WebSocket) {
@@ -25,6 +43,7 @@
 
       socket.onmessage = function(event) { 
         log(event.data);
+        popup(event.data);
       };
 
       socket.onopen = function(event) { 
