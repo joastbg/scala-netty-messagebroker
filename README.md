@@ -1,5 +1,3 @@
-Message broker for WebSockets using Scala and Socko on Akka actors
-  
-  sbt run
+Message broker proxy for WebSockets using Scala, Actors and Netty
 
-  http://127.0.0.1:8888/html
+ ws://localhost:8888/websocket/{id}
