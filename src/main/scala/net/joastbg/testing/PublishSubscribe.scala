@@ -11,7 +11,16 @@ import scala.concurrent.Future
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
-object PublishSubscribe extends App {
+
+import scala.concurrent.{ ExecutionContext, Promise }
+
+import akka.actor.ActorSystem
+import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.actor.Props
+import scala.concurrent.duration._
+
+class PublishSubscriber(pushActor: ActorRef)(implicit ec: ExecutionContext) {
   implicit val system = ActorSystem("RMQ")
   val factory = new ConnectionFactory()
   val connection = system.actorOf(ConnectionActor.props(factory), "rabbitmq")
@@ -29,6 +38,7 @@ object PublishSubscribe extends App {
     val consumer = new DefaultConsumer(channel) {
       override def handleDelivery(consumerTag: String, envelope: Envelope, properties: BasicProperties, body: Array[Byte]) {
         println("received: " + fromBytes(body))
+        pushActor ! Push("kalle", fromBytes(body))        
       }
     }
     channel.basicConsume(queue, true, consumer)
