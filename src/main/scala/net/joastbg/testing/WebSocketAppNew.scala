@@ -40,9 +40,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-//import io.netty.handler.ssl.SslContext;
-//import io.netty.handler.ssl.SslContextBuilder;
-//import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 object WebSocketAppNew extends Logger {
 
@@ -59,15 +56,10 @@ object WebSocketAppNew extends Logger {
 
     b.group(bossGroup, workerGroup)
      .channel(classOf[NioServerSocketChannel])
-     //.localAddress(new InetSocketAddress(port))
      .handler(new LoggingHandler(LogLevel.INFO))
      .childHandler(new WebSocketServerInitializer(actorSystem, pushActor))
 
     val ch: Channel = b.bind(8888).sync().channel()
-
-    //actorSystem.actorOf(pushActor ! Push("kalle", "From scheduler")
-    //actorSystem.scheduler.scheduleOnce(10 seconds, 0 minutes, pushActor, Push("kalle", "From scheduler"))
-
     val mq = new PublishSubscriber(pushActor)
 
     ch.closeFuture().sync()

@@ -62,19 +62,12 @@ class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends Chan
             
 
         println(" ------------> userEventTriggered :: IdleStateEvent: " + e)
-        //pushActor ! Push("kalle", "From scheduler")
         ctx.channel().writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer("Raptor Ping".getBytes())));
-
-            
 
              if (e.state() == IdleState.READER_IDLE) {
                  ctx.close();
              } else if (e.state() == IdleState.WRITER_IDLE) {
-                 //ctx.writeAndFlush(new PingMessage());
-                     //ctx.channel().writeAndFlush(new TextWebSocketFrame("hello world"));
-
-
-                    
+                         
              }
          }
      }
@@ -90,7 +83,6 @@ class WebSocketServerInitializer(actorSystem: ActorSystem, pushActor: ActorRef)(
 
         println(" **** WebSocketServerInitializer::initChannel: " + ch + " >> " + ch.localAddress())
 
-        //var pipeline:ChannelPipeline = ch.pipeline();
         ch.pipeline().addLast(
                     new HttpRequestDecoder(),
                     new HttpObjectAggregator(65536),
@@ -100,22 +92,8 @@ class WebSocketServerInitializer(actorSystem: ActorSystem, pushActor: ActorRef)(
 
 
          ch.pipeline.addFirst("idleStateHandler", new IdleStateHandler(0, 0, DEFAULT_CONNECT_TIMEOUT));
-          //ch.pipeline.addAfter("idleStateHandler", "idleEventHandler", timeoutHandler);
          ch.pipeline().addLast("myHandler", new MyHandler(pushActor));
 
-         //channel.pipeline().addLast("myHandler", new MyHandler());
-
-//        actorSystem.actorOf(Props[net.joastbg.testing.WebSocketPushActor]) ! Push("kalle", "From scheduler")
-
-        
-/*
-        pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpObjectAggregator(65536));
-        pipeline.addLast(new WebSocketServerCompressionHandler());
-        pipeline.addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
-        pipeline.addLast(new WebSocketIndexPageHandler(WEBSOCKET_PATH));
-        pipeline.addLast(new WebSocketFrameHandler());
-*/
     }
 
 }

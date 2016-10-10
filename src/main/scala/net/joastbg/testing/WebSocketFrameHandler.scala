@@ -41,10 +41,6 @@ import scala.concurrent.duration._
 
 import org.joda.time.DateTime
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//case class Subrecord(value: String)
-//case class Record(a: String, b: String, subrecord: Subrecord)
-
 case class Color(name: String, red: Int, green: Int, blue: Int)
 
 case class Team(name: String, color: Option[Color])
@@ -55,37 +51,6 @@ object MyJsonProtocol extends DefaultJsonProtocol {
 }
 import MyJsonProtocol._
 
-/*
-case class Answer(code: Int, content: String)
-
-object MasterJsonProtocol extends JsonFormat {
-  implicit val anwserFormat = jsonFormat2(Answer)
-}*/
-
-/*
-object RecordFormat extends JsonFormat[Record] {
-    def write(obj: Record): JsValue = {
-      JsObject(
-        ("a", JsString(obj.a)),
-        ("b", JsString(obj.b)),
-        ("reason", JsString(obj.subrecord.value))
-      )
-    }
-
-    def read(json: JsValue): Record = json match {
-      case JsObject(fields)
-            if fields.isDefinedAt("a") & fields.isDefinedAt("b") & fields.isDefinedAt("reason") =>
-              Record(fields("a").convertTo[String],
-                fields("b").convertTo[String],
-                Subrecord(fields("reason").convertTo[String])
-              )
-
-          case _ => deserializationError("Not a Record")
-    }
-}*/
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends SimpleChannelInboundHandler[WebSocketFrame] {
 
     @throws(classOf[Exception])
@@ -94,14 +59,13 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
         println(" **** WebSocketFrameHandler::channelRead0")
 
         if (frame.isInstanceOf[TextWebSocketFrame]) {
-              // Send the uppercase string back.
+
               val request: String = frame.asInstanceOf[TextWebSocketFrame].text();
-              //logger.info("{} received {}", ctx.channel(), request);
+
               println(">>>> " + frame)    
               println(">>>> " + request)
     
-              //tx.channel().writeAndFlush(new TextWebSocketFrame("hello world"));
-
+             
           } else {
               val message: String = "unsupported frame type: " + frame.getClass().getName();
               throw new UnsupportedOperationException(message);
@@ -116,18 +80,12 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
 
             pushActor ! WebSocketRegistered("kalle", ctx)
 
-            // Send the uppercase string back.
+
             val request: String = message.asInstanceOf[TextWebSocketFrame].text();
-            //logger.info("{} received {}", ctx.channel(), request);
+   
             println(">>>> " + message)    
             println(">>>> " + request)
 
-            //val record = Answer(1, "Tjena Johan")
-            //val recordToJson = record.toJson
-            //val recordFromJson = recordToJson.convertTo[Record]
-
-            //println(recordToJson)
-            //assert(recordFromJson == record)
 
             val obj = Team("Red Sox", Some(Color("Red", 255, 0, 0)))
             val ast = obj.toJson
