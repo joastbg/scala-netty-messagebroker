@@ -19,37 +19,35 @@
 
 package net.joastbg.testing
 
+import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
-import io.netty.handler.ssl.SslContext;
 import io.netty.handler.codec.http.HttpRequestDecoder
 import io.netty.handler.codec.http.HttpResponseEncoder
-import io.netty.handler.timeout.IdleStateHandler
-import io.netty.channel.ChannelDuplexHandler
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.PingWebSocketFrame
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.timeout.IdleStateHandler
 import io.netty.handler.timeout.IdleStateEvent
 import io.netty.handler.timeout.IdleState
 import io.netty.buffer.Unpooled
 
 import scala.concurrent.{ ExecutionContext, Promise }
-
+import scala.concurrent.duration._
 
 import akka.actor.ActorSystem
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
-import scala.concurrent.duration._
 
-class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends ChannelDuplexHandler {
+class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends ChannelHandlerAdapter {
     
      @throws(classOf[Exception])
      override def userEventTriggered(ctx: ChannelHandlerContext, evt: Object) {
@@ -58,8 +56,6 @@ class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends Chan
      
         if (evt.isInstanceOf[IdleStateEvent]) {        
               val e:IdleStateEvent = evt.asInstanceOf[IdleStateEvent];
-
-            
 
         println(" ------------> userEventTriggered :: IdleStateEvent: " + e)
         ctx.channel().writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer("Raptor Ping".getBytes())));

@@ -19,12 +19,6 @@
 
 package net.joastbg.testing
 
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.routes._
-import org.mashupbots.socko.infrastructure.Logger
-import org.mashupbots.socko.webserver.WebServer
-import org.mashupbots.socko.webserver.WebServerConfig
-
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits._
 
@@ -41,7 +35,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
-object WebSocketAppNew extends Logger {
+object WebSocketAppNew {
 
   val actorSystem = ActorSystem("WebSocketeActorSystem")
 

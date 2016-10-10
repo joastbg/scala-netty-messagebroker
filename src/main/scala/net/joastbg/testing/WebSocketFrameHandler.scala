@@ -25,19 +25,20 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import spray.json._
 import DefaultJsonProtocol._
 
 import scala.concurrent.{ ExecutionContext, Promise }
+import scala.concurrent.duration._
 
 import akka.actor.ActorSystem
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
-import scala.concurrent.duration._
 
 import org.joda.time.DateTime
 
@@ -49,6 +50,7 @@ object MyJsonProtocol extends DefaultJsonProtocol {
   implicit val colorFormat = jsonFormat(Color, "name", "r", "g", "b")
   implicit val teamFormat = jsonFormat(Team, "name", "jersey")
 }
+
 import MyJsonProtocol._
 
 class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends SimpleChannelInboundHandler[WebSocketFrame] {
@@ -63,8 +65,7 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
               val request: String = frame.asInstanceOf[TextWebSocketFrame].text();
 
               println(">>>> " + frame)    
-              println(">>>> " + request)
-    
+              println(">>>> " + request)    
              
           } else {
               val message: String = "unsupported frame type: " + frame.getClass().getName();
@@ -80,12 +81,10 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
 
             pushActor ! WebSocketRegistered("kalle", ctx)
 
-
             val request: String = message.asInstanceOf[TextWebSocketFrame].text();
    
             println(">>>> " + message)    
             println(">>>> " + request)
-
 
             val obj = Team("Red Sox", Some(Color("Red", 255, 0, 0)))
             val ast = obj.toJson

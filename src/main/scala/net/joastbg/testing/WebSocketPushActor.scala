@@ -3,35 +3,27 @@ package net.joastbg.testing
 
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
-
-import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.events.WebSocketFrameEvent
+import java.util.concurrent.{ConcurrentMap, ConcurrentHashMap}
 
 import akka.actor.Actor
 import akka.event.Logging
-
 import akka.actor.ActorSystem
 import akka.actor.Props
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits._
 
-import org.mashupbots.socko.infrastructure.Logger
-
 import io.netty.channel.group.DefaultChannelGroup
 import io.netty.channel.Channel
-import io.netty.util.concurrent.GlobalEventExecutor
-import java.util.concurrent.{ConcurrentMap, ConcurrentHashMap}
-
 import io.netty.channel.ChannelHandlerContext;
-
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.concurrent.GlobalEventExecutor
 
 case class Push[A](topic: String, payload: A)
 case class WebSocketRegistered(topic: String, ctx: ChannelHandlerContext)
 
-class WebSocketPushActor extends Actor with Logger {
+class WebSocketPushActor extends Actor {
 
     val groups: ConcurrentMap[String, Option[ChannelHandlerContext]] = new ConcurrentHashMap[String, Option[ChannelHandlerContext]]
  
@@ -63,7 +55,7 @@ class WebSocketPushActor extends Actor with Logger {
 
         }
         case _ => {
-          log.info("WebSocketPushActor :: received unknown")         
+          //log.info("WebSocketPushActor :: received unknown")         
         }
     }
 
