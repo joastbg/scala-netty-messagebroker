@@ -10,13 +10,17 @@
 
 
 <script type="text/javascript">
-  
+  var socket;
   function init() {
     if (!window.WebSocket) {
       window.WebSocket = window.MozWebSocket;
     } else { 
       alert("Your browser does not support Web Sockets.");
     }
+  }
+
+  function sendMsg() {
+    socket.send("Here's some text that the server is urgently awaiting!");
   }
 
   function log(text) {
@@ -37,7 +41,7 @@
   }
 
   function connect(topic) {
-    var socket;
+    
     if (window.WebSocket) {
       socket = new WebSocket("ws://localhost:8888/" + topic);
 
@@ -61,6 +65,7 @@
 <form onsubmit="return false;">
  <input type="text" name="message" value="notifications"/>
  <input type="button" value="Connect to topic" onclick="connect(this.form.message.value)" /> 
+ <input type="button" value="Send" onclick="send()" /> 
  <h3>Received</h3>
  <textarea id="consoleText" style="width: 600px; height:300px;"></textarea>
 </form>

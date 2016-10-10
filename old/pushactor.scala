@@ -3,9 +3,10 @@ package net.joastbg.testing
 import akka.actor.Actor
 import org.mashupbots.socko.infrastructure.Logger
 
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import org.jboss.netty.channel.group.DefaultChannelGroup
+import io.netty.channel.Channel
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import io.netty.channel.group.DefaultChannelGroup
+import io.netty.util.concurrent.GlobalEventExecutor
 
 import java.util.concurrent.{ConcurrentMap, ConcurrentHashMap}
 
@@ -27,7 +28,7 @@ class WebSocketPushActor extends Actor with Logger {
 
     case WebSocketRegistered(topic, channel) =>            
       // TODO: dont do putIfAbsent every time
-      groups.putIfAbsent(topic, Some(new DefaultChannelGroup()))
+      groups.putIfAbsent(topic, Some(new DefaultChannelGroup(GlobalEventExecutor.INSTANCE)))
       groups.get(topic).map(_ add(channel))
   }
 }

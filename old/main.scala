@@ -24,7 +24,7 @@ object WebSocketApp extends App with Logger with Routes {
   })
 
   // Set up to push messages on fixed interval (testing)
-  actorSystem.scheduler.schedule(0 seconds, 1 minutes, webSocketPushActor, Push("notifications", "From scheduler"))
+  actorSystem.scheduler.schedule(1 seconds, 0 minutes, webSocketPushActor, Push("notifications", "From scheduler"))
 
   webServer.start()
 }

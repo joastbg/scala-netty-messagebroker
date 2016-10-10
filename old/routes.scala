@@ -86,7 +86,7 @@ trait Routes {
 
       case PathSegments(path :: Nil) => {
         wsHandshake.authorize()
-        webSocketPushActor ! WebSocketRegistered(path, wsHandshake.channel)
+        webSocketPushActor ! WebSocketRegistered(path, wsHandshake.context.channel)
       }
     }
     case WebSocketFrame(wsFrame) => { /* Implement */ }
