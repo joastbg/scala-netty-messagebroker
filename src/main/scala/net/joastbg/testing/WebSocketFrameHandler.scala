@@ -65,15 +65,12 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
     def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame) {
 
         if (frame.isInstanceOf[TextWebSocketFrame]) {
-
-              val request: String = frame.asInstanceOf[TextWebSocketFrame].text();
-
-              logger.debug("frame: " + frame + ", request: " + request)    
-             
-          } else {
-              val message: String = "unsupported frame type: " + frame.getClass().getName();
-              throw new UnsupportedOperationException(message);
-          }
+            val request: String = frame.asInstanceOf[TextWebSocketFrame].text();
+            logger.debug("frame: " + frame + ", request: " + request)
+        } else {
+            val message: String = "unsupported frame type: " + frame.getClass().getName();
+            throw new UnsupportedOperationException(message);
+        }
     }
 
     @throws(classOf[Exception])
@@ -97,7 +94,6 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
             ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint));
 
         } else {
-
              logger.debug("message: " + message)
         }
     }
