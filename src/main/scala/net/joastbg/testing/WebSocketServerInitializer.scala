@@ -60,21 +60,23 @@ class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends Chan
         logger.debug("UserEvent: " + evt)
 
         if (evt.isInstanceOf[IdleStateEvent]) {        
-            
+
             val e:IdleStateEvent = evt.asInstanceOf[IdleStateEvent];
 
             logger.debug("UserEvent: " + e)
 
-            ctx.channel().writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer("Raptor Ping".getBytes())));
+            val msg = Unpooled.copiedBuffer("Raptor Ping".getBytes())
+            val pingFrame = new PingWebSocketFrame(msg)
+            ctx.channel().writeAndFlush(pingFrame);
 
-             if (e.state() == IdleState.READER_IDLE) {
-                 ctx.close();
-             } else if (e.state() == IdleState.WRITER_IDLE) {
-                 // ...   
-             }
-         }
+            if (e.state() == IdleState.READER_IDLE) {
+                ctx.close();
+            } else if (e.state() == IdleState.WRITER_IDLE) {
+                // ...   
+            }
+        }
     }
- }
+}
 
 class WebSocketServerInitializer(actorSystem: ActorSystem, pushActor: ActorRef)(implicit ec: ExecutionContext) extends ChannelInitializer[SocketChannel] {
 
@@ -89,16 +91,13 @@ class WebSocketServerInitializer(actorSystem: ActorSystem, pushActor: ActorRef)(
         logger.debug("InitChannel: " + ch + ", localAddress: " + ch.localAddress())
 
         ch.pipeline().addLast(
-                    new HttpRequestDecoder(),
-                    new HttpObjectAggregator(65536),
-                    new HttpResponseEncoder(),
-                    new WebSocketServerProtocolHandler("/websocket"),
-                    new WebSocketFrameHandler(pushActor));
+            new HttpRequestDecoder(),
+            new HttpObjectAggregator(65536),
+            new HttpResponseEncoder(),
+            new WebSocketServerProtocolHandler("/websocket"),
+            new WebSocketFrameHandler(pushActor));
 
-
-         ch.pipeline.addFirst("idleStateHandler", new IdleStateHandler(0, 0, DEFAULT_CONNECT_TIMEOUT));
-         ch.pipeline().addLast("myHandler", new MyHandler(pushActor));
-
+        ch.pipeline.addFirst("idleStateHandler", new IdleStateHandler(0, 0, DEFAULT_CONNECT_TIMEOUT));
+        ch.pipeline().addLast("myHandler", new MyHandler(pushActor));
     }
-
 }

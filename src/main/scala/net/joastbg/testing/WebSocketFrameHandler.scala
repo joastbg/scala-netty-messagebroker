@@ -77,7 +77,7 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
     }
 
     @throws(classOf[Exception])
-    def messageReceived(ctx: ChannelHandlerContext, message: io.netty.handler.codec.http.websocketx.WebSocketFrame) {
+    def messageReceived(ctx: ChannelHandlerContext, message: WebSocketFrame) {
        
         logger.debug("message: " + message);
 
