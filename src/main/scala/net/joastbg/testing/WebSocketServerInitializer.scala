@@ -47,26 +47,33 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends ChannelHandlerAdapter {
-    
-     @throws(classOf[Exception])
-     override def userEventTriggered(ctx: ChannelHandlerContext, evt: Object) {
 
-        println(" ------------> userEventTriggered: " + evt)
-     
+    val logger = LoggerFactory.getLogger(getClass)    
+
+    @throws(classOf[Exception])
+    override def userEventTriggered(ctx: ChannelHandlerContext, evt: Object) {
+
+        logger.debug("UserEvent: " + evt)
+
         if (evt.isInstanceOf[IdleStateEvent]) {        
-              val e:IdleStateEvent = evt.asInstanceOf[IdleStateEvent];
+            
+            val e:IdleStateEvent = evt.asInstanceOf[IdleStateEvent];
 
-        println(" ------------> userEventTriggered :: IdleStateEvent: " + e)
-        ctx.channel().writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer("Raptor Ping".getBytes())));
+            logger.debug("UserEvent: " + e)
+
+            ctx.channel().writeAndFlush(new PingWebSocketFrame(Unpooled.copiedBuffer("Raptor Ping".getBytes())));
 
              if (e.state() == IdleState.READER_IDLE) {
                  ctx.close();
              } else if (e.state() == IdleState.WRITER_IDLE) {
-                         
+                 // ...   
              }
          }
-     }
+    }
  }
 
 class WebSocketServerInitializer(actorSystem: ActorSystem, pushActor: ActorRef)(implicit ec: ExecutionContext) extends ChannelInitializer[SocketChannel] {
@@ -74,10 +81,12 @@ class WebSocketServerInitializer(actorSystem: ActorSystem, pushActor: ActorRef)(
     val WEBSOCKET_PATH = "/websocket"
     val DEFAULT_CONNECT_TIMEOUT = 30
 
+    val logger = LoggerFactory.getLogger(getClass)    
+
     @throws(classOf[Exception])
     override def initChannel(ch: SocketChannel) {
 
-        println(" **** WebSocketServerInitializer::initChannel: " + ch + " >> " + ch.localAddress())
+        logger.debug("InitChannel: " + ch + ", localAddress: " + ch.localAddress())
 
         ch.pipeline().addLast(
                     new HttpRequestDecoder(),

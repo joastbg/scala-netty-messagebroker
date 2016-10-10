@@ -26,9 +26,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -40,7 +37,12 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 import org.joda.time.DateTime
+
+//////////////////////////////////////////////////////////////////////////
 
 case class Color(name: String, red: Int, green: Int, blue: Int)
 
@@ -53,19 +55,20 @@ object MyJsonProtocol extends DefaultJsonProtocol {
 
 import MyJsonProtocol._
 
+//////////////////////////////////////////////////////////////////////////
+
 class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends SimpleChannelInboundHandler[WebSocketFrame] {
+
+    val logger = LoggerFactory.getLogger(getClass)
 
     @throws(classOf[Exception])
     def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame) {
-
-        println(" **** WebSocketFrameHandler::channelRead0")
 
         if (frame.isInstanceOf[TextWebSocketFrame]) {
 
               val request: String = frame.asInstanceOf[TextWebSocketFrame].text();
 
-              println(">>>> " + frame)    
-              println(">>>> " + request)    
+              logger.debug("frame: " + frame + ", request: " + request)    
              
           } else {
               val message: String = "unsupported frame type: " + frame.getClass().getName();
@@ -75,7 +78,8 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
 
     @throws(classOf[Exception])
     def messageReceived(ctx: ChannelHandlerContext, message: io.netty.handler.codec.http.websocketx.WebSocketFrame) {
-        println(">>>> " + message);
+       
+        logger.debug("message: " + message);
 
         if (message.isInstanceOf[TextWebSocketFrame]) {
 
@@ -83,17 +87,18 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
 
             val request: String = message.asInstanceOf[TextWebSocketFrame].text();
    
-            println(">>>> " + message)    
-            println(">>>> " + request)
+            logger.debug("message: " + message + ", request: " + request)    
 
             val obj = Team("Red Sox", Some(Color("Red", 255, 0, 0)))
             val ast = obj.toJson
 
-            println("===> " + DateTime.now())
+            logger.debug("Current timestamp: " + DateTime.now())
 
-            ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.prettyPrint));
-        }else {
-              println(" ---------> " + message)
-          }
+            ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint));
+
+        } else {
+
+             logger.debug("message: " + message)
+        }
     }
 }

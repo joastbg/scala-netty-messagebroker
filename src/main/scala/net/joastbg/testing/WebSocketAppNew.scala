@@ -35,19 +35,23 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
 object WebSocketAppNew {
 
   val actorSystem = ActorSystem("WebSocketeActorSystem")
+  val logger = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]) {
    
     val bossGroup = new NioEventLoopGroup()
     val workerGroup = new NioEventLoopGroup()
-
     val b = new ServerBootstrap()
-
     val pushActor = actorSystem.actorOf(Props[WebSocketPushActor])
 
+    logger.info("Starting WebSocket Server")
+    
     b.group(bossGroup, workerGroup)
      .channel(classOf[NioServerSocketChannel])
      .handler(new LoggingHandler(LogLevel.INFO))
@@ -58,6 +62,5 @@ object WebSocketAppNew {
 
     ch.closeFuture().sync()
 
-    System.out.println("Goto: http://localhost:8888/html")
   }
 }

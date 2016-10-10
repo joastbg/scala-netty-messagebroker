@@ -21,7 +21,12 @@ libraryDependencies ++= Seq(
   "net.debasishg" % "redisclient" % "3.2" from "http://localhost/redisclient_2.11-3.2.jar",
   "com.thenewmotion.akka" %% "akka-rabbitmq" % "2.3",
   "io.spray" % "spray-json_2.11" % "1.3.2",
-  "joda-time" % "joda-time" % "2.9.4"
+  "joda-time" % "joda-time" % "2.9.4",
+  "org.slf4j" % "slf4j-api" % "1.7.21",
+  "org.slf4j" % "slf4j-simple" % "1.7.21",
+  "com.jcabi" % "jcabi-log" % "0.17.2",
+    "com.typesafe.scala-logging" % "scala-logging_2.11" % "3.5.0",
+  "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2"
 )
 
 parallelExecution in Test := false

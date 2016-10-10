@@ -20,24 +20,30 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+
+//////////////////////////////////////////////////////////////////////////
+
 case class Push[A](topic: String, payload: A)
 case class WebSocketRegistered(topic: String, ctx: ChannelHandlerContext)
+
+//////////////////////////////////////////////////////////////////////////
 
 class WebSocketPushActor extends Actor {
 
     val groups: ConcurrentMap[String, Option[ChannelHandlerContext]] = new ConcurrentHashMap[String, Option[ChannelHandlerContext]]
- 
+    val logger = LoggerFactory.getLogger(getClass)
+
     def receive = {
 
          case Push(topic, payload) => {
 
-          println("**** WebSocketPushActor :: received Push :: " + topic + ", " + payload)         
-
-            print(groups.get(topic))
+            logger.debug(topic + ", " + payload)         
 
             groups.get(topic) match {
                 case Some(ctx) => ctx.channel().writeAndFlush(new TextWebSocketFrame(payload.toString()));
-                case _ => println("No topic found for: " + topic)
+                case _ => logger.debug("No topic found for: " + topic)
               }
 
           }
@@ -45,17 +51,17 @@ class WebSocketPushActor extends Actor {
 
         case WebSocketRegistered(topic, channel) =>  {        
 
-                println("**** WebSocketPushActor :: received WebSocketRegistered :: " + topic + ", " + channel)         
+                logger.debug(topic + ", " + channel)         
                 groups.putIfAbsent(topic, Some(channel))
 
                 groups.get(topic) match {
 
-                case _ => println("No topic found for: " + topic)
+                case _ => logger.debug("No topic found for: " + topic)
               }
 
         }
         case _ => {
-          //log.info("WebSocketPushActor :: received unknown")         
+          logger.debug("Received unknown message")         
         }
     }
 
