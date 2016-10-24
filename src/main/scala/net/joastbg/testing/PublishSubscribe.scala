@@ -1,24 +1,24 @@
 
 package net.joastbg.testing
 
-import com.thenewmotion.akka.rabbitmq._
-import concurrent.duration._
-import akka.actor._
-
 import scala.concurrent.ExecutionContext.Implicits._
-
-import scala.concurrent.Future
-import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Promise 
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
+import com.thenewmotion.akka.rabbitmq._
 
-import scala.concurrent.{ ExecutionContext, Promise }
+import concurrent.duration._
+
+import java.util.concurrent.TimeUnit
 
 import akka.actor.ActorSystem
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
-import scala.concurrent.duration._
+//import akka.actor._
 
 class PublishSubscriber(pushActor: ActorRef)(implicit ec: ExecutionContext) {
   implicit val system = ActorSystem("RMQ")
@@ -44,7 +44,6 @@ class PublishSubscriber(pushActor: ActorRef)(implicit ec: ExecutionContext) {
     channel.basicConsume(queue, true, consumer)
   }
   connection ! CreateChannel(ChannelActor.props(setupSubscriber), Some("subscriber"))
-
 
   Future {
     def loop(n: Long) {

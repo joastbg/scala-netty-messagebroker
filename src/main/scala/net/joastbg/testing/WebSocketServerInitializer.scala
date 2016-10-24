@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory
 
 class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends ChannelHandlerAdapter {
 
-    val logger = LoggerFactory.getLogger(getClass)    
+    val logger = LoggerFactory.getLogger(getClass)
 
     @throws(classOf[Exception])
     override def userEventTriggered(ctx: ChannelHandlerContext, evt: Object) {
@@ -63,10 +63,11 @@ class MyHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends Chan
 
             val e:IdleStateEvent = evt.asInstanceOf[IdleStateEvent];
 
-            logger.debug("UserEvent: " + e)
+            logger.info("UserEvent: " + e)
 
             val msg = Unpooled.copiedBuffer("Raptor Ping".getBytes())
             val pingFrame = new PingWebSocketFrame(msg)
+
             ctx.channel().writeAndFlush(pingFrame);
 
             if (e.state() == IdleState.READER_IDLE) {
@@ -94,7 +95,7 @@ class WebSocketServerInitializer(actorSystem: ActorSystem, pushActor: ActorRef)(
             new HttpRequestDecoder(),
             new HttpObjectAggregator(65536),
             new HttpResponseEncoder(),
-            new WebSocketServerProtocolHandler("/websocket"),
+            new WebSocketServerProtocolHandler("/websocket", "raptorWS-v1"),
             new WebSocketFrameHandler(pushActor));
 
         ch.pipeline.addFirst("idleStateHandler", new IdleStateHandler(0, 0, DEFAULT_CONNECT_TIMEOUT));

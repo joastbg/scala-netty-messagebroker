@@ -66,7 +66,7 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
 
         if (frame.isInstanceOf[TextWebSocketFrame]) {
             val request: String = frame.asInstanceOf[TextWebSocketFrame].text();
-            logger.debug("frame: " + frame + ", request: " + request)
+            logger.info("frame: " + frame + ", request: " + request)
         } else {
             val message: String = "unsupported frame type: " + frame.getClass().getName();
             throw new UnsupportedOperationException(message);
@@ -76,7 +76,7 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
     @throws(classOf[Exception])
     def messageReceived(ctx: ChannelHandlerContext, message: WebSocketFrame) {
        
-        logger.debug("message: " + message);
+        logger.info("message: " + message);
 
         if (message.isInstanceOf[TextWebSocketFrame]) {
 
@@ -84,17 +84,19 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
 
             val request: String = message.asInstanceOf[TextWebSocketFrame].text();
    
-            logger.debug("message: " + message + ", request: " + request)    
+            logger.info("message: " + message + ", request: " + request)    
 
             val obj = Team("Red Sox", Some(Color("Red", 255, 0, 0)))
             val ast = obj.toJson
 
-            logger.debug("Current timestamp: " + DateTime.now())
+            logger.info("Current timestamp: " + DateTime.now())
 
-            ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint));
+            //ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint));
 
         } else {
-             logger.debug("message: " + message)
+
+             // BinaryWebSocketFrame, CloseWebSocketFrame, ContinuationWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame, TextWebSocketFrame
+             logger.info("OTHER: " + message)
         }
     }
 }
