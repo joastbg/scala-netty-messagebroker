@@ -38,13 +38,30 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor
 
+import org.apache.commons.codec.binary.Base64;
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import spray.json._
+import DefaultJsonProtocol._
 
 //////////////////////////////////////////////////////////////////////////
 
 case class Push[A](topic: String, payload: A)
 case class WebSocketRegistered(topic: String, ctx: ChannelHandlerContext)
+
+//////////////////////////////////////////////////////////////////////////
+
+case class Payload(data: String, size: Int)
+case class Message(dest: String, payload: Option[Payload])
+
+object MyJsonProtocol2 extends DefaultJsonProtocol {
+  implicit val payloadFormat = jsonFormat(Payload, "data", "size")
+  implicit val messageFormat = jsonFormat(Message, "dest", "payload")
+}
+
+import MyJsonProtocol2._
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +77,15 @@ class WebSocketPushActor extends Actor {
             logger.debug(topic + ", " + payload)         
 
             groups.get(topic) match {
-                case Some(ctx) => ctx.channel().writeAndFlush(new TextWebSocketFrame(payload.toString()));
+                case Some(ctx) => {
+                    
+                    val msg = Base64.encodeBase64String(payload.toString().getBytes())
+                    val obj = Message("notification", Some(Payload(msg, msg.length())))
+                    val ast = obj.toJson
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint))
+
+                    //ctx.channel().writeAndFlush(new TextWebSocketFrame(payload.toString()));
+                }
                 case _ => logger.debug("No topic found for: " + topic)
             }
         }         

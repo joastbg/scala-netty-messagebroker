@@ -61,6 +61,5 @@ object WebSocketAppNew {
     val mq = new PublishSubscriber(pushActor)
 
     ch.closeFuture().sync()
-
   }
 }

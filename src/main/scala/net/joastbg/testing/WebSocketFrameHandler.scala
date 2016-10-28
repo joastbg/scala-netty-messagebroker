@@ -42,20 +42,43 @@ import org.slf4j.LoggerFactory
 
 import org.joda.time.DateTime
 
-//////////////////////////////////////////////////////////////////////////
+import org.apache.commons.codec.binary.Base64;
 
-case class Color(name: String, red: Int, green: Int, blue: Int)
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-case class Team(name: String, color: Option[Color])
+//case class Payload(data: String, size: Int)
+//case class Message(dest: String, payload: Option[Payload])
+
+case class Company (name: String, orgnr: String)
+case class Request (company: Company, timestamp: Long, title: String, status: Int, activity: List[String])
+
+object MyJsonProtocol1 extends DefaultJsonProtocol {
+  implicit val companyFormat = jsonFormat2(Company.apply)
+  implicit val requestFormat = jsonFormat5(Request.apply)  
+}
+
+import MyJsonProtocol1._
+
+//---------------
+
+object MyJsonProtocol3 extends DefaultJsonProtocol {
+  implicit val payloadFormat = jsonFormat(Payload, "data", "size")
+  implicit val messageFormat = jsonFormat(Message, "dest", "payload")  
+}
+
+import MyJsonProtocol3._
+
+case class NamedList[A](name: String, items: List[A])
+case class Item(name: String, company: String)
 
 object MyJsonProtocol extends DefaultJsonProtocol {
-  implicit val colorFormat = jsonFormat(Color, "name", "r", "g", "b")
-  implicit val teamFormat = jsonFormat(Team, "name", "jersey")
+  implicit def namedListFormat[A :JsonFormat] = jsonFormat2(NamedList.apply[A])  
+  implicit val ItemDTO = jsonFormat2(Item.apply)
 }
 
 import MyJsonProtocol._
 
-//////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) extends SimpleChannelInboundHandler[WebSocketFrame] {
 
@@ -80,22 +103,43 @@ class WebSocketFrameHandler(pushActor: ActorRef)(implicit ec: ExecutionContext) 
 
         if (message.isInstanceOf[TextWebSocketFrame]) {
 
-            pushActor ! WebSocketRegistered("kalle", ctx)
-
             val request: String = message.asInstanceOf[TextWebSocketFrame].text();
-   
-            logger.info("message: " + message + ", request: " + request)    
+            
+            request match {
+                case "register" => {
+                    pushActor ! WebSocketRegistered("kalle", ctx)
+                    logger.info(" >> ws client register :: " + message)
+                }
 
-            val obj = Team("Red Sox", Some(Color("Red", 255, 0, 0)))
-            val ast = obj.toJson
+                case "rpc" => {
+                    val nl = NamedList[Item](name = "leads", items = Item("Moran Kaufman", "MK Publishers Inc.")::Item("Sam Anderson",      "Enron  Inc.")::Item("Mason Freeman", "Motorola Inc.")::Item("Tony Montana", "American Tobacco Inc.")::Nil)
+                    val na = nl.toJson.compactPrint
+                    val msg = Base64.encodeBase64String(na.toString().getBytes())
+                    val obj = Message("rpc", Some(Payload(msg, msg.length())))
+                    val ast = obj.toJson
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint))
+                }
+
+                case "reqs" => {
+                    val company01 = Company("Gautr Systems AB", "556922-9486")
+                    val req = Request(company01, (new java.util.Date).getTime, "I want to buy red carpets", 0, List("One", "Two", "Three"))
+                    val ra = req.toJson.compactPrint
+                    val msg = Base64.encodeBase64String(ra.toString().getBytes())
+                    val obj = Message("rpc", Some(Payload(msg, msg.length())))
+                    val ast = obj.toJson
+                    ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint))
+                }
+
+                case _ => logger.info(" >> ws client UNHANDLED :: " + message)
+            }
 
             logger.info("Current timestamp: " + DateTime.now())
 
-            //ctx.channel().writeAndFlush(new TextWebSocketFrame(ast.compactPrint));
-
         } else {
 
-             // BinaryWebSocketFrame, CloseWebSocketFrame, ContinuationWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame, TextWebSocketFrame
+             // BinaryWebSocketFrame, CloseWebSocketFrame, ContinuationWebSocketFrame, 
+             // PingWebSocketFrame, PongWebSocketFrame, TextWebSocketFrame
+
              logger.info("OTHER: " + message)
         }
     }

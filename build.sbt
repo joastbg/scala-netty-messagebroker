@@ -29,7 +29,8 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-simple" % "1.7.21",
   "com.jcabi" % "jcabi-log" % "0.17.2",
   "com.typesafe.scala-logging" % "scala-logging_2.11" % "3.5.0",
-  "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2"
+  "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
+  "commons-codec" % "commons-codec" % "1.10"
 )
 
 parallelExecution in Test := false
