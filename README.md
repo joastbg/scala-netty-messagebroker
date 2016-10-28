@@ -1,5 +1,5 @@
-# scala-socko-messagebroker
-Message broker proxy for WebSockets using Scala, Actors and Netty
+# scala-netty-messagebroker
+Message broker proxy
 
 ws://localhost:8888/websocket/{id}
 
